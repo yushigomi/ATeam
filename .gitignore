@@ -252,5 +252,5 @@ paket-files/
 *.sln.iml
 
 # Secrets
-ConnectionStrings.config
+Web.Secret.ConnectionStrings
 AppSettings.config
