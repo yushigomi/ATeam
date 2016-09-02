@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "AngularBasic";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Angular Basic</h2>
+
+<div class="container" ng-controller="mainController as main">
+    <p> {{main.myMessage}}</p>
+    <button type="button" data-ng-click="main.changeMessage()">Change Message</button>
+   
+</div>
+
+@section scripts
+{
+
+    <script src="~/Scripts/sabio.tests.services.js"></script>
+    <script type="text/javascript">
+
+
+        sabio.page.mainControllerFactory = function ($scope, $baseController) {
+
+            var vm = this;
+
+            $baseController.merge(vm, $baseController);
+
+            vm.$scope = $scope;
+
+            vm.myMessage = "Angular is rendering on the page";
+            vm.changeMessage = _changeMessage;
+
+            function _changeMessage()
+            {
+                vm.myMessage = "Changed my message with a click";
+            }
+
+        }
+
+        sabio.ng.addController(sabio.ng.app.module
+            , "mainController"
+            , ['$scope', '$baseController']
+            , sabio.page.mainControllerFactory);
+
+
+    </script>
+}

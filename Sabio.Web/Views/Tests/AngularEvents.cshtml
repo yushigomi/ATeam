@@ -1,0 +1,220 @@
+﻿@{
+    ViewBag.Title = "AngularEvents";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Angular Events</h2>
+
+<div class="container" ng-controller="mainController as main">
+    <h1>This is the top level Controller</h1>
+    <div class="row">
+
+        <div class="col-md-12">
+            <ul class="nav nav-tabs">
+                <li ng-class="main.tabClass()" ng-repeat="tab in main.tabs" tab="tab">
+                    <a href="{{tab.link}}" ng-click="main.setSelectedTab(tab)">{{tab.label}}</a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+    <div class="row">
+        <h5>This ngView is located below here but with in the mainController</h5>
+        <p>This event was raised:{{main.eventData}}</p>
+    </div>
+    <div ng-view></div>
+</div>
+
+
+
+<script type="text/ng-template" id="/templates/main.html">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body" id="mainControllerElement"
+                     style="background-color:ActiveBorder;">
+                    <h3>This is the Index view.</h3>
+                    <h4>{{splashController.heading}}</h4>
+                    <p>{{splashController.message}}</p>
+                    <p><strong>The cleanest way to implement this behavior is to have a separate controller for each tab</strong>...however it is possible to replicate the behavior with a single controller.</p>
+                    <p>{{splashController.currentRequestLabel}}</p>
+                    <pre>{{splashController.currentRequest}}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="/templates/about.html">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body" id="pageControllerElement" style="background-color:ActiveCaption;">
+                    <h3>Code Rules Everything Around Me C.R.E.A.M.</h3>
+                    <h4>{{aboutController.heading}}</h4>
+                    <p>{{aboutController.message}}</p>
+                    <p>{{aboutController.currentRequestLabel}}</p>
+                    <pre>{{aboutController.currentRequest}}</pre>
+                    <p><button ng-click="aboutController.emitSabioEvent()" type="button">Fire Event</button></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="/templates/query.html">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body" id="queryControllerElement" style="background-color:antiquewhite;">
+                    <h3>Query Strings Controller...WTF?!1</h3>
+                    <h4>{{queryController.heading}}</h4>
+                    <p>{{queryController.message}}</p>
+                    <p><strong>Current Request Params:</strong></p>
+                    <pre>{{queryController.currentRequest.params}}</pre>
+                    <p>{{queryController.currentRequestLabel}}</p>
+                    <pre>{{queryController.currentRequest}}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+
+
+@section scripts
+{
+
+    <script src="~/Scripts/sabio.tests.services.js"></script>
+    <script type="text/javascript">
+        sabio.page.startUp = function () {
+            sabio.page.mainController = sabio.ng.getControllerInstance($("#mainControllerElement"));
+        }
+
+        sabio.ng.app.module.config(function ($routeProvider, $locationProvider) {
+
+            $routeProvider.when('/', {
+                templateUrl: '/templates/main.html',
+                controller: 'mainController',
+                controllerAs: 'splashController'
+            }).when('/about', {
+                templateUrl: '/templates/about.html',
+                controller: 'mainController',
+                controllerAs: 'aboutController'
+            })
+            .when('/query', {
+                templateUrl: '/templates/query.html',
+                controller: 'mainController',
+                controllerAs: 'queryController'
+            });
+
+            $locationProvider.html5Mode(false);
+        });
+
+        sabio.page.mainControllerFactory = function (
+            $scope
+            , $baseController, $route, $routeParams, $eventServiceFactory) {
+
+            var vm = this;
+
+            $baseController.merge(vm, $baseController);
+
+            vm.$scope = $scope;
+            vm.$route = $route;
+            vm.$routeParams = $routeParams;
+
+            vm.currentRequestLabel = "Current Request:";
+
+            vm.tabs = [
+              { link: '#/', label: 'Home' },
+              { link: '#/about', label: 'About' },
+              { link: '#/query?stay=frosty&code=fun&money=true', label: 'Query' }
+            ];
+
+            vm.selectedTab = vm.tabs[0];
+
+            vm.tabClass = _tabClass;
+            vm.setSelectedTab = _setSelectedTab;
+            vm.receiveEvent = _receiveEvent;
+            vm.setupListener = _setUpListener;
+            vm.emitSabioEvent = _emitSabioEvent;
+            vm.$sabioEventService = new $eventServiceFactory("sabioEvent");
+            //vm.$sabioEventService.eventName = "sabioEvent";
+            render();
+
+            function render() {
+
+                vm.setUpCurrentRequest(vm);
+
+                switch (vm.currentRequest.originalPath) {
+                    case "/":
+                        vm.heading = "Main Controller";
+                        vm.message = "hello! welcome to the routes demo. I am the main controller and this is the main page.";
+
+
+                        if (vm.currentRequest.isTop) {
+                            vm.setupListener();
+                        }
+                        break;
+
+                    case "/about":
+                        vm.heading = "About Us";
+                        vm.message = "This text is coming from the main controller also but it's changing because of the new route. It's the same controller but it loads a different template into ng-view.";
+                        break;
+
+                    case "/query":
+                        vm.heading = "Querystring parameters are key/value pairs.";
+                        vm.message = "They are passed in the URL of the page on GET requests. Notice how Angular captures all of these params in a variable which you can access as $route.current.params.";
+                        break;
+                }
+
+
+
+            }
+
+
+            function _emitSabioEvent() {
+                vm.$log.log("emitSabioEvent firing");
+                vm.$sabioEventService.emit(
+                    {
+                        "sabioUrl": "http://sabio.la"
+                    }
+                    );
+            }
+
+            function _setUpListener() {
+                vm.$log.log("_setUpListener firing");
+                vm.$sabioEventService.listen(vm.receiveEvent)
+            }
+
+            function _receiveEvent() {
+                vm.$log.debug(arguments);
+                vm.eventData = arguments;
+            }
+
+
+            function _tabClass(tab) {
+                if (vm.selectedTab == tab) {
+                    return "active";
+                } else {
+                    return "";
+                }
+            }
+
+            function _setSelectedTab(tab) {
+                console.log("set selected tab", tab);
+                vm.selectedTab = tab;
+            }
+        }
+
+        sabio.ng.addController(sabio.ng.app.module
+            , "mainController"
+            , ['$scope', '$baseController', '$route', '$routeParams', '$eventServiceFactory']
+            , sabio.page.mainControllerFactory);
+
+    </script>
+}
+
+
+
+

@@ -1,0 +1,172 @@
+﻿
+@{
+    ViewBag.Title = "Routes";
+    Layout = "~/Views/Shared/_LayoutAlternate.cshtml";
+}
+
+
+<h2>Angular Routes Demo (New Version)</h2>
+
+<ul class="nav nav-tabs" ng-controller="mainController as main">
+    <li ng-class="main.tabClass(tab)" ng-repeat="tab in main.tabs">
+        <a href="{{tab.link}}" ng-click="main.setSelectedTab(tab)">{{tab.label}}</a>
+    </li>
+</ul>
+<div ng-view></div>
+
+<script type="text/ng-template" id="/templates/main.html">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body" id="mainControllerElement"
+                     style="background-color:ActiveBorder;">
+                    <h3>This is the Index view.</h3>
+                    <h4>{{splashController.heading}}</h4>
+                    <p>{{splashController.message}}</p>
+                    <p><strong>The cleanest way to implement this behavior is to have a separate controller for each tab</strong>...however it is possible to replicate the behavior with a single controller.</p>
+                    <p>{{splashController.currentRequestLabel}}</p>
+                    <pre>{{splashController.currentRequest}}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="/templates/about.html">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body" id="pageControllerElement" style="background-color:ActiveCaption;">
+                    <h3>Code Rules Everything Around Me C.R.E.A.M.</h3>
+                    <h4>{{aboutController.heading}}</h4>
+                    <p>{{aboutController.message}}</p>
+                    <p>{{aboutController.currentRequestLabel}}</p>
+                    <pre>{{aboutController.currentRequest}}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="/templates/query.html">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body" id="queryControllerElement" style="background-color:antiquewhite;">
+                    <h3>Query Strings Controller...WTF?!1</h3>
+                    <h4>{{queryController.heading}}</h4>
+                    <p>{{queryController.message}}</p>
+                    <p><strong>Current Request Params:</strong></p>
+                    <pre>{{queryController.currentRequest.params}}</pre>
+                    <p>{{queryController.currentRequestLabel}}</p>
+                    <pre>{{queryController.currentRequest}}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+
+
+@section scripts
+{
+
+    <script src="~/Scripts/sabio.tests.services.js"></script>
+    <script type="text/javascript">
+
+        (function () {
+            "use strict";
+
+            angular.module(APPNAME)
+                .config(["$routeProvider", "$locationProvider", function ($routeProvider, $locationProvider) {
+
+                    $routeProvider.when('/', {
+                        templateUrl: '/templates/main.html',
+                        controller: 'mainController',
+                        controllerAs: 'splashController'
+                    }).when('/about', {
+                        templateUrl: '/templates/about.html',
+                        controller: 'mainController',
+                        controllerAs: 'aboutController'
+                    }).when('/query', {
+                        templateUrl: '/templates/query.html',
+                        controller: 'mainController',
+                        controllerAs: 'queryController'
+                    });
+
+                    $locationProvider.html5Mode(false);
+
+                }]);
+
+        })();
+
+        (function () {
+            "use strict";
+
+            angular.module(APPNAME)
+                .controller('mainController', MainController);
+
+            MainController.$inject = ['$scope', '$baseController'];
+
+            function MainController(
+                $scope
+                , $baseController) {
+
+                var vm = this;
+
+                $baseController.merge(vm, $baseController);
+
+                vm.$scope = $scope;
+
+                vm.currentRequestLabel = "Current Request:";
+
+                vm.tabs = [
+                  { link: '#/', label: 'Home' },
+                  { link: '#/about', label: 'About' },
+                  { link: '#/query?stay=frosty&code=fun&money=true', label: 'Query' }
+                ];
+
+                vm.selectedTab = vm.tabs[0];
+
+                vm.tabClass = _tabClass;
+                vm.setSelectedTab = _setSelectedTab;
+
+                render();
+
+                function render() {
+                    vm.setUpCurrentRequest(vm);
+
+                    switch (vm.currentRequest.originalPath) {
+                        case "/":
+                            vm.heading = "Main Controller";
+                            vm.message = "hello! welcome to the routes demo. I am the main controller and this is the main page.";
+                            break;
+
+                        case "/about":
+                            vm.heading = "About Us";
+                            vm.message = "This text is coming from the main controller also but it's changing because of the new route. It's the same controller but it loads a different template into ng-view.";
+                            break;
+
+                        case "/query":
+                            vm.heading = "Querystring parameters are key/value pairs.";
+                            vm.message = "They are passed in the URL of the page on GET requests. Notice how Angular captures all of these params in a variable which you can access as $route.current.params.";
+                            break;
+                    }
+                }
+
+                function _tabClass(tab) {
+                    if (vm.selectedTab == tab) {
+                        return "active";
+                    } else {
+                        return "";
+                    }
+                }
+
+                function _setSelectedTab(tab) {
+                    console.log("set selected tab", tab);
+                    vm.selectedTab = tab;
+                }
+            }
+        })();
+    </script>
+}

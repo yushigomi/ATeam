@@ -1,0 +1,107 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAlternate.cshtml";
+}
+
+<h2>Angular Events (New Version)</h2>
+<p>Events allow separate controllers who have different scopes to send and receieve messages back and forth even though otherwise they would have no way to talk to one another.</p>
+<p>One controller listens for and responds to events of a certain type. One (or more) other controller(s) can broadcast the events. The names have to match.</p>
+<div class="container">
+    <div class="row">
+
+        <div class="col-md-6" ng-controller="mainController as main">
+            <h3>Click some buttoms to fire events.</h3>
+            
+
+            <a ng-click="main.fireEvent('testPrimary')" class="btn btn-primary">Primary Event</a>
+            <a ng-click="main.fireEvent('testSuccess')" class="btn btn-success">Success Event</a>
+            <a ng-click="main.fireEvent('testWarning')" class="btn btn-warning">Warning Event</a>                        
+            <a ng-click="main.fireEvent('testDanger')" class="btn btn-danger">Danger Event</a>
+        </div>
+
+        <div class="col-md-6 output-display" ng-controller="outputController as out">
+            <h3>Output goes here.</h3>
+            <ul>
+                <li ng-repeat="event in out.events" ng-class="'btn-' + event.class">
+                    {{event.message}}
+                </li>
+            </ul>
+
+        </div>
+
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        (function () {
+            "use strict";
+
+            var MainController = function (
+              $scope
+              , $baseController) {
+
+                var vm = this;
+
+                $baseController.merge(vm, $baseController);
+
+                vm.$scope = $scope;
+
+                vm.myMessage = "Angular is rendering on the page";
+
+                vm.fireEvent = _fireEvent;
+
+                function _fireEvent(eventName) {
+
+                    var eventShortName = eventName.toLowerCase().replace("test", "");
+
+                    vm.$systemEventService.broadcast(eventName, { message: eventShortName.toUpperCase() + " event fired at " + new Date(), class:eventShortName });
+                }                
+            }
+
+            angular.module(APPNAME)
+            .controller('mainController', MainController);
+
+            MainController.$inject = ['$scope', '$baseController'];
+        })();
+
+        (function () {
+            "use strict";
+
+            var OutputController = function (
+              $baseController) {
+
+                var vm = this;
+
+                $baseController.merge(vm, $baseController);
+
+                vm.events = null;
+
+                _init();
+
+                function _init() {
+                    vm.$systemEventService.listen("testSuccess", _onTestSystemEvent);
+                    vm.$systemEventService.listen("testWarning", _onTestSystemEvent);
+                    vm.$systemEventService.listen("testPrimary", _onTestSystemEvent);
+                    vm.$systemEventService.listen("testDanger", _onTestSystemEvent);
+
+                    vm.events = [];
+                }
+
+                function _onTestSystemEvent(event, payload) {
+
+                    var event = payload[1];
+
+                    console.log("on TEST system event", event);
+
+                    vm.events.unshift(event);
+                }
+            }
+
+            angular.module(APPNAME)
+            .controller('outputController', OutputController);
+
+            OutputController.$inject = ['$baseController'];
+        })();
+    </script>
+}

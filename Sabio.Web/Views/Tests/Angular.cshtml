@@ -1,0 +1,358 @@
+﻿@{
+
+}
+
+<h2>Angular</h2>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-body"
+                 data-ng-controller="$employeeController as dashboard" 
+                 id="employeeCtrler">
+                <!-- the "as" syntax here is used to simply give a friendlier name to the controller
+                from here and below we have to reference the controller by this name:dashboard
+                the controller in this design also holds the data
+                -->
+                <div class="panel-heading">
+                    <h4>Active Employees - {{dashboard.headingInfo}}</h4>
+                </div>
+                <div class="panel-body admin-body">
+
+                    <div class="row">
+
+                        <div class="col-sm-6">
+                            <div class="row animate-repeat" data-ng-repeat="emp in dashboard.items track by emp.id">
+                                <!-- the ng-repeat is creating a for look arround the .users array -->
+                                <div class="col-sm-4">
+                                    <a data-ng-click="dashboard.selectEmployee(emp)" 
+                                       href="">
+                                        <!-- on click of this anchor tag, a function within the controller will be fired
+                                        that function is called selectUser and it accepts a user object.
+                                        "user" is a memeber of the array and we call that object user because
+                                        that is the name we gave it in the ng-repeat attribute
+                                        -->
+                                        <i class="fa fa-user"></i> {{emp.firstName}} {{emp.lastName}}
+                                        <!-- the double {} is just Angular syntax/markers for where to output data-->
+                                    </a>
+
+                                </div>
+                                <div class="col-sm-2">
+                                    <span class="pull-right">{{emp.dob  | date:'shortDate'}}</span>
+                                </div>
+                                <div class="col-sm-6">{{emp.title}}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+
+                            <!-- ng-if statement will remove the emlement from the DOM if it evaluates to true
+                            here we hide this element when there is no selectedUser
+
+                            -->
+                            <div data-ng-if="!dashboard.selectedEmployee" class="">
+                                <p class="text-info center text-center"><strong class="center ">Select an Employee</strong></p>
+
+                            </div>
+                            <!-- here we show this dom element when there is a selected user-->
+                            <div class="row animate-if" data-ng-if="dashboard.selectedEmployee"
+                                 data-ng-include="'/scripts/app/admin/selectedEmployee.html'">
+                                <!-- this special ng-include attribute tells angular
+                                to grab the content for the child elments from an
+                                HTML snippet that is either embedded on the page or
+                                located at the url specified by the url (see below for template)
+                                -->
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="panel-body admin-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+
+                            <button type="button" data-ng-click="dashboard.showEmployeeForm()" class="btn btn-info">
+                                Add New Employee
+                            </button><br/><br/>
+                            <div class="row animate-if" data-ng-if="dashboard.employeeFormVisible" data-ng-include="'/scripts/app/admin/newEmployee.html'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+
+<script type="text/ng-template" id="/scripts/app/admin/selectedEmployee.html">
+
+    <div class="col-sm-12">
+        <div class="text-center">
+            <h3>
+                {{dashboard.selectedEmployee.firstName}} {{dashboard.selectedEmployee.lastName}}
+            </h3>
+        </div>
+        <div class="row form-group ">
+            <div class="col-sm-3">Current Status</div>
+            <div class="col-sm-3">
+                <!--
+                    This is all Angular specific syntax for populating the
+                    options of the drop down.
+
+                    the options for the drop down are dropped o the page
+                    from the server side. it is a list of UserStatus enum values
+
+                    the ng-model attribute signals that the model should bound, two way to the selected value
+                    of the select
+                    -->
+                <select data-ng-init="dashboard.selectedEmployee.status"
+                        data-ng-model="dashboard.selectedEmployee.status"
+                        name="employeeStatus"
+                        data-ng-options="key for (key , value) in dashboard.$sabio.employeeStatuses track by value"></select>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-sm-3">First Name</div>
+            <div class="col-sm-3">
+                <!--
+                This is all Angular specific syntax for populating the
+                options of the drop down.
+
+                the options for the drop down are dropped o the page
+                from the server side. it is a list of UserStatus enum values
+
+                the ng-model attribute signals that the model should bound, two way to the selected value
+                of the select
+                -->
+
+                <input type="text" data-ng-model="dashboard.selectedEmployee.firstName" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3">
+                <!-- the button click here will call a saveStatus function that accepts
+                    a user object, specifically the selectedUser object
+                    -->
+                <button type="button" data-ng-click="dashboard.saveStatus(dashboard.selectedEmployee)"
+                        class="btn-outlined btn-sm btn-success">
+                    Save
+                </button>
+
+                <button type="button" data-ng-click="dashboard.selectEmployee()"
+                        class="btn-outlined btn-sm btn-warning">
+                    Cancel
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</script>
+
+<script type="text/ng-template" id="/scripts/app/admin/newEmployee.html">
+    <form id="employeeForm" name="dashboard.employeeForm" ng-submit="dashboard.addEmployee()" novalidate>
+        <div class="form-group">
+            <input type="text" class="form-control ng-class:{'error': dashboard.showNewEmployeeErrors && !dashboard.employeeForm.firstName.$valid}"
+                   placeholder="First Name"
+                   name="firstName"
+                   id="firstName"
+                   ng-model="dashboard.newEmployee.firstName"
+                   ng-minlength="2"
+                   ng-maxlength="50"
+                   required>
+            <div role="alert" class="help-inline error">
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.firstName.$error.required">First Name is required</span>
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.firstName.$error.minlength">Too short! First name must be at least 2 characters</span>
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.firstName.$error.maxlength">Too long! First name must be 50 characters or less</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="text"
+                   class="form-control ng-class:{'error': dashboard.showNewEmployeeErrors && !dashboard.employeeForm.lastName.$valid}"
+                   placeholder="Last Name"
+                   name="lastName"
+                   id="lastName"
+                   ng-model="dashboard.newEmployee.lastName"
+                   ng-minlength="2"
+                   ng-maxlength="50"
+                   required>
+            <div role="alert" class="help-inline error">
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.lastName.$error.required">Last Name is required</span>
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.lastName.$error.minlength">Too short! Last name must be at least 2 characters</span>
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.lastName.$error.maxlength">Too long! Last name must be 50 characters or less</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="email"
+                   class="form-control ng-class:{'error': dashboard.showNewEmployeeErrors && !dashboard.employeeForm.email.$valid}"
+                   placeholder="Email"
+                   name="email"
+                   id="email"
+                   ng-model="dashboard.newEmployee.email"
+                   required>
+            <div role="alert" class="help-inline error">
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.email.$error.required">Email is required</span>
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.email.$error.email">Must be a valid email address</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="number"
+                   class="form-control ng-class:{'error': dashboard.showNewEmployeeErrors && !dashboard.employeeForm.age.$valid}"
+                   placeholder="Age"
+                   name="age"
+                   id="age"
+                   min="18"
+                   ng-model="dashboard.newEmployee.age"
+                   required>
+            <div role="alert" class="help-inline error">
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.age.$error.required">Age is required</span>
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.age.$error.number">Must be a number</span>
+                <span class="error" ng-show="dashboard.showNewEmployeeErrors && dashboard.employeeForm.age.$error.min">Employees must be at least 18 years old</span>
+            </div>
+        </div>
+        <button type="submit" id="cmdAddPerson" class="btn btn-success">Add Employee</button>
+        <button type="button" id="cmdResetPerson" class="btn btn-warning" ng-click="dashboard.resetEmployeeForm()">Cancel</button>
+        <button type="button" id="cmdEchoPerson" class="btn btn-info" ng-click="dashboard.echoEmployee()">Echo Employee</button>
+    </form>
+</script>
+
+@section scripts
+{
+    <script src="~/Scripts/sabio.tests.services.js"></script>
+    <script type="text/javascript">
+
+      
+
+        sabio.page.employeeStatuses = { "Active": 1, "Inactive": 2, "Flagged": 3 };
+
+        sabio.page.startUp = function () {
+            //this is to get an instance of ng controller that is created for the div
+            sabio.page.employeeController = sabio.ng.getControllerInstance($("#employeeCtrler"));
+        }
+
+        // var service = new sabio.tests.services.employeeFactory($baseService);
+
+        sabio.tests.services.employeeFactory = function ($baseService) {
+
+            var aSabioServiceObject = sabio.tests.services.employees;
+
+            var newService = $baseService.merge(true, {}, aSabioServiceObject, $baseService);
+
+            return newService;
+        }
+
+        // var controller = new sabio.page.employeeControllerFactory(....);
+        sabio.page.employeeControllerFactory = function (
+            $scope
+            , $baseController
+            , $employeeService) {
+
+            var vm = this;//this points to a new {}
+            vm.headingInfo = "Angular 101";
+            vm.items = null;
+            vm.selectedEmployee = null;
+            vm.newEmployee = null;
+            vm.employeeForm = null;
+            vm.employeeFormVisible = false;
+            vm.showNewEmployeeErrors = false;
+
+            vm.$employeeService = $employeeService;
+            vm.$scope = $scope;
+
+            vm.receiveItems = _receiveItems;
+            vm.onEmpError = _onEmpError;
+            vm.selectEmployee = _selectEmployee;
+            vm.saveStatus = _saveStatus;
+            vm.showEmployeeForm = _showEmployeeForm;
+            vm.addEmployee = _addEmployee;
+            vm.echoEmployee = _echoEmployee;
+            vm.resetEmployeeForm = _resetEmployeeForm;
+
+            //-- this line to simulate inheritance
+            $baseController.merge(vm, $baseController);
+
+            //this is a wrapper for our small dependency on $scope
+            vm.notify = vm.$employeeService.getNotifier($scope);
+
+            //this is like the sabio.startUp function
+            render();
+
+            function render() {
+                vm.$employeeService.get(vm.receiveItems, vm.onEmpError);
+            }
+
+            function _receiveItems(data) {
+                //this receives the data and calls the special
+                //notify method that will trigger ng to refresh UI
+                vm.notify(function () {
+                    vm.items = data.items;
+                });
+            }
+
+            function _resetEmployeeForm() {
+                console.log("reset form");
+                vm.employeeFormVisible = false;
+                vm.showNewEmployeeErrors = false;
+                vm.newEmployee = null;
+                vm.employeeForm.$setPristine();
+                vm.employeeForm.$setUntouched()
+            }
+
+            function _showEmployeeForm() {
+                console.log("show form!");
+                vm.employeeFormVisible = !vm.employeeFormVisible;
+            }
+
+            function _addEmployee() {
+                vm.showNewEmployeeErrors = true;
+
+                if (vm.employeeForm.$valid)
+                {
+                    console.log("data is valid! go save this object -> ", vm.newEmployee);
+                }
+                else
+                {
+                    console.log("form submitted with invalid data :(")
+                }                
+            }
+
+            function _echoEmployee() {
+                console.log("ECHO employee -> ", vm.newEmployee);
+            }
+
+            function _selectEmployee(anEmp) {
+                console.log(anEmp);
+                vm.selectedEmployee = anEmp;
+            }
+
+            function _saveStatus(anEmp) {
+                console.log("Go and save this new data");
+                console.log(anEmp);
+            }
+
+            function _onEmpError(jqXhr, error) {
+                console.error(error);
+            }
+        }
+
+        /*
+        Below here is where we register our service and controller with ng
+        */
+
+        sabio.ng.addService(sabio.ng.app.module
+            , "$employeeService"
+            , ["$baseService"]
+            , sabio.tests.services.employeeFactory);
+
+        sabio.ng.addController(sabio.ng.app.module
+            , "$employeeController"
+            , ['$scope', '$baseController', "$employeeService"]
+            , sabio.page.employeeControllerFactory)
+
+    </script>
+}

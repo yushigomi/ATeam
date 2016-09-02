@@ -1,0 +1,44 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAlternate.cshtml";
+}
+
+<h2>Angular Basic (New Version)</h2>
+
+<div class="container" ng-controller="mainController as main">
+    <p> {{main.myMessage}}</p>
+    <button type="button" data-ng-click="main.changeMessage()">Change Message</button>
+
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        (function () {
+            "use strict";
+
+            angular.module(APPNAME)
+                .controller('mainController', MainController);
+
+            MainController.$inject = ['$scope', '$baseController'];
+
+            function MainController(
+              $scope
+              , $baseController) {
+
+                var vm = this;
+
+                $baseController.merge(vm, $baseController);
+
+                vm.$scope = $scope;
+
+                vm.myMessage = "Angular is rendering on the page";
+                vm.changeMessage = _changeMessage;
+
+                function _changeMessage() {
+                    vm.myMessage = "Changed my message with a click";
+                }
+            }
+
+        })();
+    </script>
+}

@@ -1,0 +1,30 @@
+{
+  "name": "Sabio Ng",
+  "authors": [
+    "Aaron Gibson <aaron@sabio.la>"
+  ],
+  "description": "Sabio Angular Application",
+  "main": "sabio.core.js",
+  "moduleType": [],
+  "keywords": [
+    "sabio"
+  ],
+  "license": "MIT",
+  "homepage": "sabio.la",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.8",
+    "bootstrap": "~3.3.6",
+    "angular-bootstrap": "~0.14.3",
+    "angular-route": "~1.4.8",
+    "angular-animate": "~1.4.8",
+    "angular-toastr": "~1.6.0"
+  }
+}

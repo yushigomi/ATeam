@@ -1,0 +1,197 @@
+﻿@{
+    ViewBag.Title = "AngularGeography";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #map-canvas {
+        width: 100%;
+        height: 500px;
+        background-color: #CCC;
+    }
+</style>
+
+<h2>Angular Geography Demo</h2>
+
+<section data-ng-controller="geoController as geo">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-6">
+                    <form class="forms" data-ng-submit="geo.submitAddressForm()">
+                        <div class="form-group">
+                            <label for="address1">Address</label>
+                            <input type="text"
+                                   name="address1"
+                                   id="address1"
+                                   class="form-control"
+                                   placeholder="Enter Street Address"
+                                   data-ng-model="geo.address.address1" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text"
+                                   name="city"
+                                   id="city"
+                                   class="form-control"
+                                   placeholder="Enter City"
+                                   data-ng-model="geo.address.city" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text"
+                                   name="state"
+                                   id="state"
+                                   class="form-control"
+                                   placeholder="Enter State"
+                                   data-ng-model="geo.address.state" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="zip">Zip Code</label>
+                            <input type="number"
+                                   maxlength="5"
+                                   name="zip"
+                                   id="zip"
+                                   class="form-control"
+                                   placeholder="Enter Zip Code"
+                                   data-ng-model="geo.address.zip" />
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Geocode</button>
+                        </div>
+                    </form>
+
+                    <div data-ng-show="geo.geocodeResponse">
+                        <h3>Response from Google</h3>
+                        <pre>
+                        {{geo.geocodeResponse}}
+                        </pre>
+                    </div>
+                </div><!-- /.col  -->
+
+                <div class="col-md-6">
+                    <div id="map-canvas"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+@section scripts
+{
+    @*this API key is for starter.dev - you must replace it to use with a different domain. *@
+    <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyB8lBWbzy6YM-HCBF-GktY8p6C2J8J1KxI"></script>
+
+    <script type="text/javascript">
+
+        sabio.page.geoControllerFactory = function (
+        $scope  //  these three arguments are dependencies which are specified below and passed into the controller by ng
+        , $baseController
+        , $baseService
+        ) {
+
+            var vm = this;
+            //  inherit from $baseController
+            $.extend(vm, $baseController);
+
+            vm.notify = $baseService.getNotifier($scope);
+
+            //  hoist our public function(s)
+            vm.submitAddressForm = _submitAddressForm;
+
+            //  initialize our data and other properties for this page
+            vm.address = {
+                //address1: "400 Corporate Pointe Drive",
+                //city: "Culver City",
+                //state: "CA",
+                //zip:90291
+            };
+            vm.geocoder = null;
+            vm.map = null;
+            vm.addressId = null;
+            vm.geocodeResponse = null;
+
+            //  invoke the initialize function to setup the map for this page
+            _initialize()
+
+            function _initialize() {
+                vm.geocoder = new google.maps.Geocoder();
+                var latlng = new google.maps.LatLng(-34.397, 150.644);
+                var mapOptions = {
+                    zoom: 8,
+                    center: latlng
+                }
+                vm.map = new google.maps.Map($('#map-canvas')[0], mapOptions);
+            }
+
+            function _submitAddressForm() {
+
+                var addressString = vm.address.address1 + " " + vm.address.city + " " + vm.address.state + " " + vm.address.zip;
+
+                _codeAddress(addressString);
+            }
+
+            function _codeAddress(address) {
+                console.log("address string -> ", address);
+
+                vm.geocoder.geocode({ 'address': address }, _onCodeAddress);
+            }
+
+            function _onCodeAddress(results, status) {
+                vm.notify(function () {
+                    vm.geocodeResponse = JSON.stringify(results, null, "     ");
+                });
+
+                if (status == google.maps.GeocoderStatus.OK) {
+
+                    var geometry = results[0].geometry;
+                    var loc = geometry.location;
+
+                    console.log("got location data from API", loc);
+
+                    vm.map.setCenter(loc);
+
+                    var marker = new google.maps.Marker({
+                        map: vm.map,
+                        position: loc
+                    });
+
+                    if (geometry.viewport)
+                        vm.map.fitBounds(geometry.viewport);
+
+                    var lat = loc.lat();
+                    var lon = loc.lng();
+
+                    console.log("found coordinates in reply -> (%s, %s)", lat, lon);
+
+                    vm.address.latitude = lat;
+                    vm.address.longitude = lon;
+
+                    _saveAddress();
+
+                } else {
+                    alert('Geocode was not successful for the following reason: ' + status);
+                }
+            }
+
+            function _saveAddress() {
+                if (vm.addressId && vm.addressId.length > 0) {
+                    console.log("UPDATE address data", vm.address);
+                }
+                else {
+                    console.log("CREATE address data", vm.address);
+                }
+            }
+        }
+
+        sabio.ng.addController(sabio.ng.app.module
+            , "geoController"
+            , ['$scope', '$baseController', '$baseService']   //  here we pass in $employeeService which was created in the previous step
+            , sabio.page.geoControllerFactory)
+    </script>
+}

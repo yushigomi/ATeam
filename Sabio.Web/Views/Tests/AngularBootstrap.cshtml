@@ -1,0 +1,287 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Angular Advanced Directives</h2>
+<p>
+    This page shows you how to use some of the directives provided by Angular Bootstrap module: <a href="https://angular-ui.github.io/bootstrap/" target="_blank">https://angular-ui.github.io/bootstrap/</a>.
+</p>
+
+<div class="container" ng-controller="mainController as main">
+    <tabset justified="true">
+        <tab heading="Layout">
+            <p>These directives are used to make different layout effects on your pages.</p>
+            <h4><a target="_blank" href="https://angular-ui.github.io/bootstrap/#/accordion">Accordion menu</a></h4>
+            <accordion close-others="true">
+
+                <accordion-group heading="Static Header, initially expanded" is-open="main.status.isFirstOpen" is-disabled="main.status.isFirstDisabled">
+                    This content is straight in the template.
+                </accordion-group>
+
+                <accordion-group heading="Second Accordion Header">
+                    <p>The body of the accordion group grows to fit the contents! Man that's fancy.</p>
+                    <img src="http://placekitten.com/g/500/500">
+                </accordion-group>
+
+                <accordion-group is-open="main.status.open">
+                    <accordion-heading>
+                        The heading can have markup, too! <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': main.status.open, 'glyphicon-chevron-right': !main.status.open}"></i>
+                    </accordion-heading>
+                    This is just some content to illustrate fancy headings.
+                </accordion-group>
+
+            </accordion>
+
+            <h4><a target="_blank" href="https://angular-ui.github.io/bootstrap/#/carousel">Image Carousel</a></h4>
+            <div style="height: 305px">
+                <carousel interval="main.carouselInterval">
+                    <slide ng-repeat="slide in main.slides" active="slide.active">
+                        <img ng-src="{{slide.image}}" style="margin:auto;">
+                        <div class="carousel-caption">
+                            <h4>Slide {{$index}}</h4>
+                            <p>{{slide.text}}</p>
+                        </div>
+                    </slide>
+                </carousel>
+            </div>
+        </tab>
+        <tab heading="Feedback">
+            <p>This tab demonstrates several different ways to display feedback to the user or get information back.</p>
+            <h4><a target="_blank" href="https://angular-ui.github.io/bootstrap/#/modal">Modal Window</a></h4>
+            <button class="btn btn-primary" ng-click="main.openModal()">Open me!</button>
+            <br />
+            <br />
+            <h4><a target="_blank" href="https://angular-ui.github.io/bootstrap/#/alert">Alerts</a></h4>
+            <alert ng-show="main.modalSelected" type="success">
+                Selection from modal is: <strong>{{main.modalSelected}}</strong>.
+                This value is coming from a property in main controller which gets set when the modal window closes.
+            </alert>
+            <alert ng-repeat="alert in main.alerts" close="closeAlert=true" ng-hide="closeAlert" type="{{alert.type}}">{{alert.msg}}</alert>
+            <h4><a target="_blank" href="https://angular-ui.github.io/bootstrap/#/popover">Popover Messages</a></h4>
+
+            <button popover-placement="top" popover="On the Top!" class="btn btn-primary">Top</button>
+            <button popover-placement="left" popover="On the Left!" class="btn btn-primary">Left</button>
+            <button popover-placement="right" popover="On the Right!" class="btn btn-primary">Right</button>
+            <button popover-placement="bottom" popover="On the Bottom!" class="btn btn-primary">Bottom</button>
+            <br /><br />
+        </tab>
+        <tab heading="Forms">
+            <p>Here you can find several directives to spice up your forms and input fields.</p>
+            <p><strong>Note: </strong> for a complete working demo of Angular form validation please see the <a href="/Tests/angular" target="_blank">Angular test page</a> (click on the "Add New Employee" button).</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <form method="post" ng-submit="main.testSubmit()">
+                        <div class="form-group has-success has-feedback">
+                            <label class="control-label" for="inputSuccess2">Input with success</label>
+                            <input tooltip="This tooltip shows when you hover over the input element." tooltip-placement="top" ng-model="main.testFormData.successField" type="text" class="form-control" id="inputSuccess2" aria-describedby="inputSuccess2Status">
+                            <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+                            <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                        </div>
+                        <div class="form-group has-warning has-feedback">
+                            <label class="control-label" for="inputWarning2">Input with warning</label>
+                            <input ng-model="main.testFormData.warningField" type=" text" class="form-control" id="inputWarning2" aria-describedby="inputWarning2Status">
+                            <span class="glyphicon glyphicon-warning-sign form-control-feedback" aria-hidden="true"></span>
+                            <span id="inputWarning2Status" class="sr-only">(warning)</span>
+                        </div>
+                        <div class="form-group has-error has-feedback">
+                            <label class="control-label" for="inputError2">Input with error</label>
+                            <input tooltip="This tooltip shows when you submit the form." tooltip-enable="main.testFormSubmitted" ng-model="main.testFormData.errorField" type="text" class="form-control" id="inputError2" aria-describedby="inputError2Status">
+                            <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+                            <span id="inputError2Status" class="sr-only">(error)</span>
+                        </div>
+                        <div class="form-group has-success has-feedback">
+                            <label class="control-label" for="inputGroupSuccess1">Input group with success</label>
+                            <div class="input-group">
+                                <span class="input-group-addon">@@</span>
+                                <input ng-model="main.testFormData.groupSuccess" type="text" class="form-control" id="inputGroupSuccess1" aria-describedby="inputGroupSuccess1Status">
+                            </div>
+                            <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+                            <span id="inputGroupSuccess1Status" class="sr-only">(success)</span>
+                        </div>
+                        <div class="form-group has-success has-feedback">
+                            <button type="submit" class="btn btn-success">Submit Form</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <form>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Date Picker</label>
+                            <p class="input-group">
+                                <input type="date" class="form-control" datepicker-popup ng-model="dt" is-open="opened" min-date="minDate" max-date="'2015-06-22'" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                                </span>
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Password</label>
+                            <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Email address</label>
+                            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Email address</label>
+                            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+                        </div>
+                        
+                        <div class="form-group has-success ">
+                            <button type="submit" class="btn btn-success">Submit Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </tab>
+<tab heading="Other">Other types of directives.</tab>
+    </tabset>
+</div>
+
+
+<script type="text/ng-template" id="modalContent.html">
+    <div class="modal-header">
+        <h3 class="modal-title">I'm a modal!</h3>
+    </div>
+    <div class="modal-body">
+        <ul>
+            <li ng-repeat="item in mc.modalItems">
+                <a class="btn btn-success" ng-click="mc.selected.item = item">{{ item }}</a>
+            </li>
+        </ul>
+        Selected: <b>{{ mc.selected.item }}</b>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="mc.ok()">OK</button>
+        <button class="btn btn-warning" ng-click="mc.cancel()">Cancel</button>
+    </div>
+</script>
+
+@section pageInitScripts{
+    <script src="~/Scripts/ng/ui-bootstrap-tpls-0.13.0.min.js"></script>
+    <script type="text/javascript">
+        sabio.extraModuleDependencies = ['ui.bootstrap'];
+    </script>
+}
+
+@section scripts
+{
+    <script src="~/Scripts/sabio.tests.services.js"></script>
+    <script type="text/javascript">
+        sabio.page.mainControllerFactory = function (
+            $scope
+            , $baseController
+            , $modal) {
+
+            var vm = this;
+
+            $baseController.merge(vm, $baseController);
+
+            vm.$scope = $scope;
+
+        //  modal directive
+            vm.modalSelected = null;
+            vm.modalItems = ['item1', 'item2', 'item3'];
+
+        //  carousel directive
+            vm.carouselInterval = 5000;
+            vm.slides = [];
+
+            var _addSlide = function () {
+                var newWidth = 600 + vm.slides.length + 1;
+                vm.slides.push({
+                    image: 'http://placekitten.com/' + newWidth + '/300',
+                    text: ['More', 'Extra', 'Lots of', 'Surplus'][vm.slides.length % 4] + ' ' +
+                      ['Cats', 'Kittys', 'Felines', 'Cutes'][vm.slides.length % 4]
+                });
+            };
+
+            for (var i = 0; i < 4; i++) {
+                _addSlide();
+            }
+
+        //  test form
+            vm.testForm = null;
+            vm.testFormData = {};
+            vm.testFormSubmitted = false;
+            
+            vm.status = {
+                isFirstOpen: true,
+                isFirstDisabled: false
+            };
+
+        //  alert directive
+            vm.alerts = [
+                { type: 'danger', msg: 'Oh snap! Change a few things up and try submitting again.' },
+                { type: 'info', msg: 'Well done! You successfully read this important alert message.' }
+            ];
+
+        //  controller functions
+            vm.testSubmit = function()
+            {
+                console.log("submit test form", vm.testFormData);
+                vm.testFormSubmitted = true;
+            }
+
+            vm.openModal = function () {
+                var modalInstance = $modal.open({
+                    animation: $scope.animationsEnabled,
+                    templateUrl: 'modalContent.html',
+                    controller: 'modalController as mc',
+                    size: 'sm',
+                    resolve: {
+                        items: function () {
+                            return vm.modalItems;
+                        }
+                    }
+                });
+
+                modalInstance.result.then(function (selectedItem) {
+                    vm.modalSelected = selectedItem;
+                }, function () {
+                    console.log('Modal dismissed at: ' + new Date());
+                });
+            }
+        }
+
+        sabio.page.modalControllerFactory = function (
+            $scope
+            , $baseController
+            , $modalInstance
+            , items) {
+
+            var vm = this;
+
+            $baseController.merge(vm, $baseController);
+
+            vm.$scope = $scope;
+            vm.$modalInstance = $modalInstance;
+
+            vm.modalItems = items;
+            vm.selected = {
+                item: vm.modalItems[0]
+            };
+
+            vm.ok = function () {
+                vm.$modalInstance.close(vm.selected.item);
+            };
+
+            vm.cancel = function () {
+                vm.$modalInstance.dismiss('cancel');
+            };
+        }
+
+        sabio.ng.addController(sabio.ng.app.module
+            , "modalController"
+            , ['$scope', '$baseController', '$modalInstance', 'items']
+            , sabio.page.modalControllerFactory);
+
+        sabio.ng.addController(sabio.ng.app.module
+            , "mainController"
+            , ['$scope', '$baseController', '$modal']
+            , sabio.page.mainControllerFactory);
+    </script>
+}
