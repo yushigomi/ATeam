@@ -253,4 +253,4 @@ paket-files/
 
 # Secrets
 Web.Secret.ConnectionStrings
-AppSettings.config
+Web.Secret.AppSettings
