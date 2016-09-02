@@ -1476,6 +1476,7 @@
     <Content Include="Views\Example\Events.cshtml" />
     <Content Include="Views\Example\Bootstrap.cshtml" />
     <Content Include="Views\Example\Geography.cshtml" />
+    <None Include="Web.Secret.ConnectionStrings" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
